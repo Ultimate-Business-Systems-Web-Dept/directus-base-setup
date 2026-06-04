@@ -1,0 +1,24 @@
+# Environment
+.env
+.env.local
+.env.production
+.env.staging
+
+# Uploads and local dumps
+uploads/*
+!uploads/.gitkeep
+
+dumps/*
+!dumps/.gitkeep
+
+# Node
+node_modules/
+extensions/node_modules/
+npm-debug.log*
+
+# Local database files
+database.sqlite
+
+# OS files
+.DS_Store
+Thumbs.db
