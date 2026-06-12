@@ -11,6 +11,13 @@ services:
       - ./snapshot:/directus/snapshot
     env_file:
       - .env
+    environment:
+      DB_CLIENT: pg
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_DATABASE: postgres
+      DB_USER: postgres
+      DB_PASSWORD: ${DB_PASSWORD}
     depends_on:
       - database
 
@@ -22,7 +29,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: local_dev_password
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: postgres
 
 volumes:
