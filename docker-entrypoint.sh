@@ -43,14 +43,22 @@ done
 
 echo "PostgreSQL is reachable."
 
-if [ -f "/directus/snapshot/schema.yaml" ]; then
+echo "Bootstrapping Directus database..."
+node /directus/cli.js bootstrap || {
+  echo "Database bootstrap failed. Stopping startup."
+  exit 1
+}
+
+SCHEMA_SNAPSHOT_PATH="${SCHEMA_SYNC_PATH:-/directus/snapshot/schema.yaml}"
+
+if [ -f "$SCHEMA_SNAPSHOT_PATH" ]; then
   echo "Applying Directus schema snapshot..."
-  node /directus/cli.js schema apply /directus/snapshot/schema.yaml || {
+  node /directus/cli.js schema apply "$SCHEMA_SNAPSHOT_PATH" || {
     echo "Schema apply failed. Stopping startup."
     exit 1
   }
 else
-  echo "No schema snapshot found at /directus/snapshot/schema.yaml. Skipping schema apply."
+  echo "No schema snapshot found at $SCHEMA_SNAPSHOT_PATH. Skipping schema apply."
 fi
 
 echo "Starting Directus..."
