@@ -6,8 +6,8 @@ services:
     ports:
       - "8055:8055"
     volumes:
-      - ./uploads:/directus/uploads
       - ./extensions:/directus/extensions
+      - ./uploads:/directus/uploads
       - ./snapshot:/directus/snapshot
     env_file:
       - .env
@@ -19,7 +19,10 @@ services:
       DB_USER: postgres
       DB_PASSWORD: ${DB_PASSWORD}
     depends_on:
-      - database
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   database:
     image: postgres:17
@@ -31,6 +34,21 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: postgres
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 volumes:
   postgres_data:
+  redis_data:
