@@ -1,0 +1,66 @@
+{
+  "name": "@directus-labs/migration-bundle",
+  "type": "module",
+  "version": "1.2.0",
+  "description": "Migrate from the current source Directus instance to another target Directus instance.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/directus-labs/extensions.git",
+    "directory": "packages/migration-bundle"
+  },
+  "keywords": [
+    "directus",
+    "directus-extension",
+    "directus-extension-bundle"
+  ],
+  "icon": "extension",
+  "files": [
+    "dist"
+  ],
+  "directus:extension": {
+    "type": "bundle",
+    "path": {
+      "app": "dist/app.js",
+      "api": "dist/api.js"
+    },
+    "entries": [
+      {
+        "type": "module",
+        "name": "migration-module",
+        "source": "src/migration-module/index.ts"
+      },
+      {
+        "type": "endpoint",
+        "name": "migration-endpoint",
+        "source": "src/migration-endpoint/index.ts"
+      }
+    ],
+    "host": "^11.1.2"
+  },
+  "dependencies": {
+    "@directus/errors": "^2.0.4",
+    "@directus/extensions": "^3.0.11",
+    "@directus/sdk": "^20.1.0",
+    "@directus/utils": "^13.0.10",
+    "bottleneck": "^2.19.5",
+    "defu": "^6.1.4",
+    "dompurify": "^3.2.7",
+    "formdata-node": "^6.0.3",
+    "marked": "^15.0.12"
+  },
+  "devDependencies": {
+    "@directus/extensions-sdk": "16.0.2",
+    "@directus/types": "^13.2.3",
+    "@types/node": "^24.7.0",
+    "typescript": "^5.9.3",
+    "vue": "^3.5.22"
+  },
+  "scripts": {
+    "build": "directus-extension build",
+    "dev": "directus-extension build -w --no-minify",
+    "link": "directus-extension link",
+    "add": "directus-extension add",
+    "validate": "directus-extension validate"
+  }
+}
