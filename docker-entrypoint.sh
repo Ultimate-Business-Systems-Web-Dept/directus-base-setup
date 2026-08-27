@@ -122,17 +122,6 @@ bootstrap_directus || {
   exit 1
 }
 
-SNAPSHOT_FILE=""
-
-if [ -f "/directus/snapshot/schema.live.vacat.json" ]; then
-  SNAPSHOT_FILE="/directus/snapshot/schema.live.vacat.json"
-elif [ -n "${SCHEMA_SYNC_PATH:-}" ] && [ -f "${SCHEMA_SYNC_PATH}" ]; then
-  SNAPSHOT_FILE="${SCHEMA_SYNC_PATH}"
-elif [ -f "/directus/snapshot/schema.yaml" ]; then
-  SNAPSHOT_FILE="/directus/snapshot/schema.yaml"
-fi
-
-
 echo "Starting Directus..."
 node /directus/cli.js start &
 DIRECTUS_PID=$!
@@ -143,59 +132,5 @@ wait_for_host_port "127.0.0.1" "${PORT:-8055}" "Directus API" || {
   wait "$DIRECTUS_PID" 2>/dev/null || true
   exit 1
 }
-
-if [ -n "$SNAPSHOT_FILE" ] && [ -f "$SNAPSHOT_FILE" ]; then
-  echo "Applying Directus schema snapshot from $SNAPSHOT_FILE..."
-  if ! node /directus/scripts/apply-schema-snapshot.mjs "$SNAPSHOT_FILE"; then
-    echo "Schema apply failed. Stopping startup."
-    kill "$DIRECTUS_PID" 2>/dev/null || true
-    wait "$DIRECTUS_PID" 2>/dev/null || true
-    exit 1
-  fi
-else
-  echo "No schema snapshot found. Skipping schema apply."
-fi
-
-echo "Ensuring globals collection and metadata..."
-if ! node /directus/scripts/ensure-globals-system.mjs; then
-  echo "Globals schema ensure failed. Stopping startup."
-  kill "$DIRECTUS_PID" 2>/dev/null || true
-  wait "$DIRECTUS_PID" 2>/dev/null || true
-  exit 1
-fi
-
-echo "Seeding global settings content..."
-if ! node /directus/scripts/seed-globals-content.mjs; then
-  echo "Globals seed failed. Stopping startup."
-  kill "$DIRECTUS_PID" 2>/dev/null || true
-  wait "$DIRECTUS_PID" 2>/dev/null || true
-  exit 1
-fi
-
-
-
-echo "Ensuring richer form schema metadata and relations..."
-if ! node /directus/scripts/ensure-form-system.mjs; then
-  echo "Form schema ensure failed. Stopping startup."
-  kill "$DIRECTUS_PID" 2>/dev/null || true
-  wait "$DIRECTUS_PID" 2>/dev/null || true
-  exit 1
-fi
-
-echo "Seeding required form content..."
-if ! node /directus/scripts/seed-form-content.mjs; then
-  echo "Form seed failed. Stopping startup."
-  kill "$DIRECTUS_PID" 2>/dev/null || true
-  wait "$DIRECTUS_PID" 2>/dev/null || true
-  exit 1
-fi
-
-echo "Ensuring form email flows..."
-if ! node /directus/scripts/sync-form-email-flows.mjs; then
-  echo "Form email flow sync failed. Stopping startup."
-  kill "$DIRECTUS_PID" 2>/dev/null || true
-  wait "$DIRECTUS_PID" 2>/dev/null || true
-  exit 1
-fi
 
 wait "$DIRECTUS_PID"
